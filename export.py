@@ -88,7 +88,7 @@ def build(snapshot, schema, target):
     snapshot["mirror"] = {
         "site": BASE, "source": ORIGIN + "/api/agent",
         "publishedSnapshotAt": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "refresh": "Scheduled every 15 minutes; GitHub scheduling can be delayed. Failed builds retain the previous snapshot.",
+        "refresh": "Source checked every 10 seconds; meaningful changes trigger after 20 seconds of batching, at most once per 120 seconds. A 15-minute schedule is fallback. Build, queue and CDN cache delays still apply. Failed builds retain the previous snapshot.",
         "static": True, "queryParametersSupported": False,
         "instructions": "Follow the actual section/day links. URL query parameters do not filter a static GitHub Pages site."
     }
@@ -103,8 +103,10 @@ def build(snapshot, schema, target):
              f"Home: {BASE}\nFull normalized JSON: {BASE}data.json\n"
              f"Full text: {BASE}llms-full.txt\nSchema: {BASE}schema.json\n"
              f"Source generatedAt: {snapshot['generatedAt']}\n"
-             "This is a periodically refreshed static snapshot. Refresh is scheduled every 15 minutes, "
-             "but may be delayed. Check generatedAt and each source's observedAt before analysis.\n"
+             "This is a static snapshot refreshed when source data changes. The server checks every 10 seconds, "
+             "batches for 20 seconds, and triggers at most once every 2 minutes. A 15-minute schedule is fallback. "
+             "Build queues and CDN caching can delay visibility; it is not instantaneous. "
+             "Check generatedAt and each source's observedAt before analysis.\n"
              "No login is needed; there are no write endpoints. Query parameters are NOT supported. "
              "Use category and date links on the home page. All absolute timestamps are ISO 8601 UTC; "
              "manual daily attribution uses Asia/Shanghai.\n"
@@ -146,7 +148,8 @@ def build(snapshot, schema, target):
         day_links.append(f'<li><a href="days/{day}.html">{day}</a> · '
                          f'<a href="days/{day}.json">JSON</a></li>')
     body = (f'<p>公开只读；源数据生成时间：{html.escape(snapshot["generatedAt"])}。</p>'
-            '<p>计划每 15 分钟更新，实际可能延迟。此为静态快照，URL 查询参数不能筛选。'
+            '<p>服务器每 10 秒检查数据变化，合并 20 秒内的变化，最多每 2 分钟触发一次更新；'
+            '每 15 分钟定时更新作兜底。构建、排队和缓存可能带来额外延迟，并非实时页面。URL 查询参数不能筛选。'
             '以下所有页面包含完整服务端生成正文，无需运行 JavaScript。</p>'
             '<p><a href="llms.txt">Agent 阅读指南</a> · <a href="llms-full.txt">完整文本</a> · '
             '<a href="data.html">完整 HTML</a> · <a href="data.json">完整 JSON</a> · '
