@@ -67,6 +67,23 @@ class ExportTests(unittest.TestCase):
         self.assertEqual(list(result["data"]), ["health"])
         self.assertEqual(result["summaries"], {})
 
+    def test_today_rolls_at_beijing_midnight_without_changing_dated_pages(self):
+        source = fixture()
+        source["generatedAt"] = "2026-01-02T16:01:00Z"
+        with tempfile.TemporaryDirectory() as directory:
+            build(source, {"properties": {"summaries": {}}}, directory)
+            root = Path(directory)
+            today = json.loads((root / "today.json").read_text())
+            self.assertEqual(today["query"]["fromDay"], "2026-01-03")
+            self.assertEqual(today["mirror"]["generatedAtBeijing"], "2026-01-03T00:01:00+08:00")
+            self.assertEqual(today["data"]["records"], [])
+            self.assertEqual(today["data"]["books"], source["data"]["books"])
+            old_day = json.loads((root / "days/2026-01-02.json").read_text())
+            self.assertEqual(len(old_day["data"]["records"]), 1)
+            page = (root / "today.html").read_text()
+            self.assertLess(page.index("2026-01-03 00:01:00"), page.index("<pre>"))
+            self.assertIn("utm_source", (root / "llms.txt").read_text())
+
 
 if __name__ == "__main__":
     unittest.main()

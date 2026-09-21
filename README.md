@@ -2,6 +2,8 @@
 
 Site: https://taratraovo.github.io/personal-records-reader/
 
+For daily agent analysis, use https://taratraovo.github.io/personal-records-reader/today.html (or `today.json`). Each new deployment selects the current Asia/Shanghai day. `/days/YYYY-MM-DD.html` always selects that fixed date. Every HTML data page begins with its selection date and snapshot time in Beijing time. Agents should report these and distinguish snapshot generation from each source's observation time; a cached or failed fetch must not be described as current data. `utm_source` does not filter dates or force fresh content. These aids expose staleness; they cannot override a reader's cache.
+
 This repository contains only exporter code and synthetic tests. The user has explicitly chosen to publish their records without a password. Actual record snapshots are fetched from the existing public read-only API during deployment; they are never committed to Git. Deployment artifacts are deleted after deployment (a one-day expiration also applies). Public readers and caches can still retain copies of public content.
 
 The site has initial HTML, JSON and plain text, complete category pages, and pre-generated daily pages. No JavaScript or login is needed. Query parameters do not filter the static site. Read `llms.txt` for units, timestamps, provenance and missing-data limitations. Book progress is a current snapshot, not a historical series.
